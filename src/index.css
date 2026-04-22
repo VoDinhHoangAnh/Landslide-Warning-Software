@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #0f172a;
+  color: white;
+}
+
+.mapboxgl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left {
+  display: none !important;
+}
+
+.mapboxgl-canvas-container.mapboxgl-interactive {
+  cursor: default !important;
+}
+
+.mapboxgl-popup-content {
+  padding: 6px 10px !important;
+  border-radius: 4px !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15) !important;
+  background: rgba(255,255,255,0.95) !important;
+  color: #1e293b !important;
+  font: 11px/1.5 ui-monospace, monospace !important;
+}
+
+.mapboxgl-popup-tip {
+  display: none !important;
+}

@@ -1,0 +1,39 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Caches and large data files
+__pycache__/
+dem_cache/
+et_cache/
+ndvi_cache/
+rainfall_cache/
+smap_cache/
+landslide_history/
+LaoCai_Lithological_Parameters/
+*.h5
+*.nc4
+*.hgt
+*.tif
+*.csv
