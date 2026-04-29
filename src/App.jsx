@@ -1286,7 +1286,8 @@ const App = () => {
         distRoad: '--',
         distWater: '--',
         zoomWarning: false,
-        isPlaceholder: true
+        isPlaceholder: true,
+        missingInputs: ['Soil', 'NDVI', 'Rainfall', 'SMAP', 'ET']
       });
     } else {
       // Khi tắt Inspector
@@ -1978,6 +1979,7 @@ const App = () => {
                 onClick={() => {
                   setIsFetching(true);
                   setDataLoaded(false);
+                  setAnalysisComplete(false);
                   setActiveNasaLayer(null);
                   setFetchProgress({ step: 'Connecting...', percent: 0 });
                   
