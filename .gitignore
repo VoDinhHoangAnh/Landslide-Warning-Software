@@ -23,8 +23,15 @@ dist-ssr
 *.sln
 *.sw?
 
+# Secrets / local config
+.env
+.env.*
+!.env.example
+.claude/
+
 # Caches and large data files
 __pycache__/
+*.pyc
 dem_cache/
 et_cache/
 ndvi_cache/
