@@ -1793,10 +1793,10 @@ const App = () => {
                 ? 'bg-rose-600 text-white hover:bg-rose-700 shadow-sm'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             } ${maxFos === 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
-            title={maxFos === 0 ? 'Loading slope units…' : 'Toggle Danger Zones filter'}
+            title={maxFos === 0 ? 'Loading slope units…' : 'Toggle FoS filter (lower FoS = more dangerous)'}
           >
-            <span aria-hidden="true">⚠</span>
-            <span>Danger Zones</span>
+            <span aria-hidden="true">🎚</span>
+            <span>FoS Filter</span>
             {showDangerZones && (
               <span className="ml-1 px-1.5 py-0.5 rounded bg-white/25 text-[10px] font-mono">
                 {dangerCount.toLocaleString()}
