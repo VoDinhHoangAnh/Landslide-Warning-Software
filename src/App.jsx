@@ -1430,35 +1430,6 @@ const App = () => {
             </form>
           </div>
 
-          <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">X-Ray Visualizers</h2>
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-bold text-slate-800 uppercase tracking-wider">Infrastructure</p>
-                <p className="text-[10px] text-slate-500 font-medium mt-1">Road networks & Paths</p>
-              </div>
-              <button 
-                onClick={() => setShowRoads(!showRoads)}
-                className={`w-12 h-6 rounded-full transition-colors duration-300 relative ${showRoads ? 'bg-amber-500' : 'bg-slate-200'}`}
-              >
-                <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-transform duration-300 shadow-sm ${showRoads ? 'translate-x-7' : 'translate-x-1'}`} />
-              </button>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-bold text-slate-800 uppercase tracking-wider">Hydrology</p>
-                <p className="text-[10px] text-slate-500 font-medium mt-1">Rivers & Waterways</p>
-              </div>
-              <button 
-                onClick={() => setShowWater(!showWater)}
-                className={`w-12 h-6 rounded-full transition-colors duration-300 relative ${showWater ? 'bg-cyan-500' : 'bg-slate-200'}`}
-              >
-                <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-transform duration-300 shadow-sm ${showWater ? 'translate-x-7' : 'translate-x-1'}`} />
-              </button>
-            </div>
-          </div>
-
           {/* SLOPE UNITS PANEL */}
           <div className="mt-8 pt-8 border-t border-slate-100">
             <div className="flex items-center justify-between mb-4">
