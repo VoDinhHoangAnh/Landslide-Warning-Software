@@ -944,6 +944,13 @@ const App = () => {
     if (!map.current || !map.current.isStyleLoaded()) return;
     if (!map.current.getLayer('slope-units-fill')) return;
 
+    // Danger Zones owns the layer while it's on. Skip this effect.
+    if (showDangerZones) return;
+
+    // Danger Zones may have left a filter behind — clear it before repainting.
+    map.current.setFilter('slope-units-fill', null);
+    map.current.setFilter('slope-units-outline', null);
+
     if (!showSlopeUnits) {
       map.current.setPaintProperty('slope-units-fill', 'fill-color', 'rgba(0,0,0,0)');
       map.current.setPaintProperty('slope-units-fill', 'fill-opacity', 1);
@@ -1000,7 +1007,7 @@ const App = () => {
 
     map.current.setPaintProperty('slope-units-fill', 'fill-color', colorMaps[slopeUnitColor] || colorMaps.mean_slope);
     map.current.setPaintProperty('slope-units-fill', 'fill-opacity', 0.5);
-  }, [showSlopeUnits, slopeUnitColor]);
+  }, [showSlopeUnits, slopeUnitColor, showDangerZones]);
 
   // Danger Zones: fetch slope-units geojson once, cache features + compute max FoS
   useEffect(() => {
