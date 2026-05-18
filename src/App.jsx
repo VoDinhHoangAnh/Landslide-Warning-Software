@@ -1024,6 +1024,45 @@ const App = () => {
     return () => { cancelled = true; };
   }, []);
 
+  // Danger Zones: apply filter + FoS color when toggled on
+  useEffect(() => {
+    if (!map.current || !map.current.isStyleLoaded()) return;
+    if (!map.current.getLayer('slope-units-fill')) return;
+
+    if (!showDangerZones) {
+      map.current.setFilter('slope-units-fill', null);
+      map.current.setFilter('slope-units-outline', null);
+      if (!showSlopeUnits) {
+        map.current.setPaintProperty('slope-units-fill', 'fill-opacity', 0);
+        map.current.setPaintProperty('slope-units-outline', 'line-opacity', 0);
+      }
+      return;
+    }
+
+    const fosColor = [
+      'interpolate', ['linear'], ['get', 'fos'],
+      0.5, '#d7191c',
+      0.8, '#e85285',
+      1.0, '#fdae61',
+      1.2, '#ffffbf',
+      1.5, '#abdda4',
+      3.0, '#2b83ba'
+    ];
+    const filterExpr = ['<=', ['get', 'fos'], dangerThreshold];
+
+    map.current.setFilter('slope-units-fill', filterExpr);
+    map.current.setFilter('slope-units-outline', filterExpr);
+    map.current.setPaintProperty('slope-units-fill', 'fill-color', fosColor);
+    map.current.setPaintProperty('slope-units-fill', 'fill-opacity', 0.6);
+    map.current.setPaintProperty('slope-units-outline', 'line-opacity', 0.8);
+    map.current.setPaintProperty('slope-units-outline', 'line-width', 1.2);
+
+    const count = slopeUnitsFeaturesRef.current.filter(
+      f => typeof f?.properties?.fos === 'number' && f.properties.fos <= dangerThreshold
+    ).length;
+    setDangerCount(count);
+  }, [showDangerZones, dangerThreshold, showSlopeUnits]);
+
   // Xử lý Tìm kiếm tọa độ
   // --- BATCH EXTRACTION ENGINE (VIEWPORT-CRAWLING) ---
   const executeBatchProcess = (polygonFeature, resolutionMeters, fileNamePrefix) => {
