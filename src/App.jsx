@@ -1817,11 +1817,6 @@ const App = () => {
               <span className="text-[11px] font-mono text-slate-700 tabular-nums w-20">
                 FoS ≤ {dangerThreshold.toFixed(2)}
               </span>
-              {dangerCount === 0 && (
-                <span className="text-[10px] text-amber-600 font-semibold">
-                  Lower threshold to see zones
-                </span>
-              )}
             </div>
           )}
         </div>
