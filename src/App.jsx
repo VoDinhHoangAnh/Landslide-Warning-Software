@@ -403,6 +403,13 @@ const App = () => {
   const [showSlopeUnits, setShowSlopeUnits] = useState(false);
   const [slopeUnitColor, setSlopeUnitColor] = useState('fos');
 
+  // Danger Zones (FoS filter overlay on slope-units layer)
+  const [showDangerZones, setShowDangerZones] = useState(false);
+  const [dangerThreshold, setDangerThreshold] = useState(1.5);
+  const [maxFos, setMaxFos] = useState(0);
+  const [dangerCount, setDangerCount] = useState(0);
+  const slopeUnitsFeaturesRef = useRef([]);
+
   // NASA Satellite Panel
   const [showSatellitePanel, setShowSatellitePanel] = useState(true);
   const [fetchDate, setFetchDate] = useState('2026-04-12');
