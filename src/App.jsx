@@ -389,6 +389,7 @@ const App = () => {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const searchMarker = useRef(null);
+  const pinMarker = useRef(null);
   const nasaPopup = useRef(null);
   
   // Toggles hiển thị
@@ -484,8 +485,13 @@ const App = () => {
     const onClick = (e) => {
       if (!isInspectorActiveRef.current) return;
       if (pinClickTimer) clearTimeout(pinClickTimer);
+      const { lng, lat } = e.lngLat;
       pinClickTimer = setTimeout(() => {
-        performExtraction(e.lngLat.lng, e.lngLat.lat);
+        performExtraction(lng, lat);
+        if (pinMarker.current) pinMarker.current.remove();
+        pinMarker.current = new mapboxgl.Marker({ color: '#10b981' })
+          .setLngLat([lng, lat])
+          .addTo(map.current);
         setIsInspectorPinned(true);
         pinClickTimer = null;
       }, 220);
@@ -493,6 +499,7 @@ const App = () => {
     const onDblClick = () => {
       if (!isInspectorActiveRef.current) return;
       if (pinClickTimer) { clearTimeout(pinClickTimer); pinClickTimer = null; }
+      if (pinMarker.current) { pinMarker.current.remove(); pinMarker.current = null; }
       if (isInspectorPinnedRef.current) setIsInspectorPinned(false);
     };
 
@@ -1434,6 +1441,7 @@ const App = () => {
       // Khi tắt Inspector
       setInspectedData(null);
     }
+    if (pinMarker.current) { pinMarker.current.remove(); pinMarker.current = null; }
     setIsInspectorPinned(false);
     setIsInspectorActive(nextState);
   };
