@@ -1002,6 +1002,28 @@ const App = () => {
     map.current.setPaintProperty('slope-units-fill', 'fill-opacity', 0.5);
   }, [showSlopeUnits, slopeUnitColor]);
 
+  // Danger Zones: fetch slope-units geojson once, cache features + compute max FoS
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/lao_cai_slope_units.geojson')
+      .then(r => r.json())
+      .then(geojson => {
+        if (cancelled) return;
+        const feats = geojson?.features || [];
+        slopeUnitsFeaturesRef.current = feats;
+        const fosValues = feats
+          .map(f => f?.properties?.fos)
+          .filter(v => typeof v === 'number' && Number.isFinite(v));
+        if (fosValues.length > 0) {
+          setMaxFos(Math.max(...fosValues));
+        }
+      })
+      .catch(err => {
+        console.error('Danger Zones: failed to load slope-units geojson', err);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
   // Xử lý Tìm kiếm tọa độ
   // --- BATCH EXTRACTION ENGINE (VIEWPORT-CRAWLING) ---
   const executeBatchProcess = (polygonFeature, resolutionMeters, fileNamePrefix) => {
