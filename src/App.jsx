@@ -1763,6 +1763,49 @@ const App = () => {
              <div className="absolute h-full w-[1px] bg-black"></div>
           </div>
         )}
+
+        {/* Danger Zones overlay */}
+        <div className="absolute top-4 left-4 z-20 flex items-center gap-2 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg border border-slate-200 px-3 py-2">
+          <button
+            onClick={() => setShowDangerZones(!showDangerZones)}
+            disabled={maxFos === 0}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-colors ${
+              showDangerZones
+                ? 'bg-rose-600 text-white hover:bg-rose-700 shadow-sm'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            } ${maxFos === 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
+            title={maxFos === 0 ? 'Loading slope units…' : 'Toggle Danger Zones filter'}
+          >
+            <span aria-hidden="true">⚠</span>
+            <span>Danger Zones</span>
+            {showDangerZones && (
+              <span className="ml-1 px-1.5 py-0.5 rounded bg-white/25 text-[10px] font-mono">
+                {dangerCount.toLocaleString()}
+              </span>
+            )}
+          </button>
+          {showDangerZones && (
+            <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
+              <input
+                type="range"
+                min={0}
+                max={maxFos}
+                step={0.05}
+                value={dangerThreshold}
+                onChange={(e) => setDangerThreshold(Math.min(parseFloat(e.target.value), maxFos))}
+                className="w-40 accent-rose-600"
+              />
+              <span className="text-[11px] font-mono text-slate-700 tabular-nums w-20">
+                FoS ≤ {dangerThreshold.toFixed(2)}
+              </span>
+              {dangerCount === 0 && (
+                <span className="text-[10px] text-amber-600 font-semibold">
+                  Lower threshold to see zones
+                </span>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Floating Data Inspector Card */}
