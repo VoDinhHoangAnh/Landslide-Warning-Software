@@ -477,6 +477,46 @@ const App = () => {
     isInspectorPinnedRef.current = isInspectorPinned;
   }, [isInspectorPinned]);
 
+  // Pin / unpin click handlers — separate effect so HMR re-binds cleanly
+  useEffect(() => {
+    if (!map.current) return;
+    let pinClickTimer = null;
+    const onClick = (e) => {
+      if (!isInspectorActiveRef.current) return;
+      if (pinClickTimer) clearTimeout(pinClickTimer);
+      pinClickTimer = setTimeout(() => {
+        performExtraction(e.lngLat.lng, e.lngLat.lat);
+        setIsInspectorPinned(true);
+        pinClickTimer = null;
+      }, 220);
+    };
+    const onDblClick = () => {
+      if (!isInspectorActiveRef.current) return;
+      if (pinClickTimer) { clearTimeout(pinClickTimer); pinClickTimer = null; }
+      if (isInspectorPinnedRef.current) setIsInspectorPinned(false);
+    };
+
+    const bind = () => {
+      map.current.doubleClickZoom.disable();
+      map.current.on('click', onClick);
+      map.current.on('dblclick', onDblClick);
+    };
+
+    if (map.current.loaded && map.current.loaded()) {
+      bind();
+    } else {
+      map.current.once('load', bind);
+    }
+
+    return () => {
+      if (pinClickTimer) clearTimeout(pinClickTimer);
+      if (!map.current) return;
+      map.current.off('click', onClick);
+      map.current.off('dblclick', onDblClick);
+      map.current.off('load', bind);
+    };
+  }, []);
+
   const loadCacheInfo = async () => {
     try {
       const res = await fetch(`${API_BASE}/api/cache-status`);
@@ -748,24 +788,6 @@ const App = () => {
       }, 100);
 
       map.current.on('mousemove', throttledExtraction);
-
-      // Pin / unpin with click vs double-click
-      map.current.doubleClickZoom.disable();
-      let pinClickTimer = null;
-      map.current.on('click', (e) => {
-        if (!isInspectorActiveRef.current) return;
-        if (pinClickTimer) clearTimeout(pinClickTimer);
-        pinClickTimer = setTimeout(() => {
-          performExtraction(e.lngLat.lng, e.lngLat.lat);
-          setIsInspectorPinned(true);
-          pinClickTimer = null;
-        }, 220);
-      });
-      map.current.on('dblclick', () => {
-        if (!isInspectorActiveRef.current) return;
-        if (pinClickTimer) { clearTimeout(pinClickTimer); pinClickTimer = null; }
-        if (isInspectorPinnedRef.current) setIsInspectorPinned(false);
-      });
 
     });
   }, []);
