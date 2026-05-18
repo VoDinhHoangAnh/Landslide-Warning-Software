@@ -1031,12 +1031,38 @@ const App = () => {
     return () => { cancelled = true; };
   }, []);
 
-  // Danger Zones: apply filter + FoS color when toggled on
+  // Danger Zones: throttled filter applier (heavy Mapbox work)
+  const applyDangerFilter = useMemo(
+    () => throttle((threshold) => {
+      if (!map.current?.isStyleLoaded()) return;
+      if (!map.current.getLayer('slope-units-fill')) return;
+      const filterExpr = ['<=', ['get', 'fos'], threshold];
+      map.current.setFilter('slope-units-fill', filterExpr);
+      map.current.setFilter('slope-units-outline', filterExpr);
+    }, 60, { leading: true, trailing: true }),
+    []
+  );
+
+  // Danger Zones: count is always recomputed (cheap, never bails)
+  useEffect(() => {
+    if (!showDangerZones) return;
+    const feats = slopeUnitsFeaturesRef.current;
+    if (!feats.length) return;
+    let count = 0;
+    for (let i = 0; i < feats.length; i++) {
+      const v = feats[i]?.properties?.fos;
+      if (typeof v === 'number' && v <= dangerThreshold) count++;
+    }
+    setDangerCount(count);
+  }, [showDangerZones, dangerThreshold]);
+
+  // Danger Zones: apply paint + filter to Mapbox layer
   useEffect(() => {
     if (!map.current || !map.current.isStyleLoaded()) return;
     if (!map.current.getLayer('slope-units-fill')) return;
 
     if (!showDangerZones) {
+      applyDangerFilter.cancel();
       map.current.setFilter('slope-units-fill', null);
       map.current.setFilter('slope-units-outline', null);
       if (!showSlopeUnits) {
@@ -1055,20 +1081,13 @@ const App = () => {
       1.5, '#abdda4',
       3.0, '#2b83ba'
     ];
-    const filterExpr = ['<=', ['get', 'fos'], dangerThreshold];
-
-    map.current.setFilter('slope-units-fill', filterExpr);
-    map.current.setFilter('slope-units-outline', filterExpr);
     map.current.setPaintProperty('slope-units-fill', 'fill-color', fosColor);
     map.current.setPaintProperty('slope-units-fill', 'fill-opacity', 0.6);
     map.current.setPaintProperty('slope-units-outline', 'line-opacity', 0.8);
     map.current.setPaintProperty('slope-units-outline', 'line-width', 1.2);
 
-    const count = slopeUnitsFeaturesRef.current.filter(
-      f => typeof f?.properties?.fos === 'number' && f.properties.fos <= dangerThreshold
-    ).length;
-    setDangerCount(count);
-  }, [showDangerZones, dangerThreshold, showSlopeUnits]);
+    applyDangerFilter(dangerThreshold);
+  }, [showDangerZones, dangerThreshold, showSlopeUnits, applyDangerFilter]);
 
   // Xử lý Tìm kiếm tọa độ
   // --- BATCH EXTRACTION ENGINE (VIEWPORT-CRAWLING) ---
