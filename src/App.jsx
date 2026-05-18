@@ -436,8 +436,10 @@ const App = () => {
   // Trạng thái Inspector
   const [inspectedData, setInspectedData] = useState(null);
   const [isInspectorActive, setIsInspectorActive] = useState(false);
+  const [isInspectorPinned, setIsInspectorPinned] = useState(false);
   const [isSearchActive, setIsSearchActive] = useState(false);
   const isInspectorActiveRef = useRef(isInspectorActive);
+  const isInspectorPinnedRef = useRef(false);
 
   // Trạng thái Search
   const [searchQuery, setSearchQuery] = useState('');
@@ -470,6 +472,10 @@ const App = () => {
       map.current.getCanvasContainer().style.cursor = isInspectorActive ? 'crosshair' : '';
     }
   }, [isInspectorActive, isSearchActive]);
+
+  useEffect(() => {
+    isInspectorPinnedRef.current = isInspectorPinned;
+  }, [isInspectorPinned]);
 
   const loadCacheInfo = async () => {
     try {
@@ -737,10 +743,29 @@ const App = () => {
       // ENGINE TRÍCH XUẤT DỮ LIỆU HOVER WITH THROTTLE (100ms limit)
       const throttledExtraction = throttle((e) => {
         if (!isInspectorActiveRef.current) return;
+        if (isInspectorPinnedRef.current) return;
         performExtraction(e.lngLat.lng, e.lngLat.lat);
       }, 100);
 
       map.current.on('mousemove', throttledExtraction);
+
+      // Pin / unpin with click vs double-click
+      map.current.doubleClickZoom.disable();
+      let pinClickTimer = null;
+      map.current.on('click', (e) => {
+        if (!isInspectorActiveRef.current) return;
+        if (pinClickTimer) clearTimeout(pinClickTimer);
+        pinClickTimer = setTimeout(() => {
+          performExtraction(e.lngLat.lng, e.lngLat.lat);
+          setIsInspectorPinned(true);
+          pinClickTimer = null;
+        }, 220);
+      });
+      map.current.on('dblclick', () => {
+        if (!isInspectorActiveRef.current) return;
+        if (pinClickTimer) { clearTimeout(pinClickTimer); pinClickTimer = null; }
+        if (isInspectorPinnedRef.current) setIsInspectorPinned(false);
+      });
 
     });
   }, []);
@@ -1387,6 +1412,7 @@ const App = () => {
       // Khi tắt Inspector
       setInspectedData(null);
     }
+    setIsInspectorPinned(false);
     setIsInspectorActive(nextState);
   };
 
@@ -1795,16 +1821,21 @@ const App = () => {
 
       {/* Floating Data Inspector Card */}
       {(isInspectorActive || isSearchActive) && inspectedData && (
-        <div className="absolute top-8 right-8 z-20 bg-white/95 backdrop-blur-md border border-slate-200 p-6 rounded-2xl shadow-2xl w-96 pointer-events-none">
+        <div className={`absolute top-8 right-8 z-20 bg-white/95 backdrop-blur-md border border-slate-200 p-6 rounded-2xl shadow-2xl w-96 max-h-[calc(100vh-4rem)] overflow-y-auto ${isInspectorPinned || isSearchActive ? 'pointer-events-auto' : 'pointer-events-none'}`}>
           <div className="flex items-center gap-3 mb-4 border-b border-slate-100 pb-4">
             {isSearchActive ? (
                <div className="w-2 h-2 rounded-full bg-rose-500" />
+            ) : isInspectorPinned ? (
+               <div className="w-2 h-2 rounded-full bg-emerald-500" />
             ) : (
                <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
             )}
             <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-widest">
-              {isSearchActive ? 'Search Result Vector' : (inspectedData.isPlaceholder ? 'Inspector Ready' : 'Extracted Vector')}
+              {isSearchActive ? 'Search Result Vector' : (isInspectorPinned ? '📍 Pinned Vector' : (inspectedData.isPlaceholder ? 'Inspector Ready' : 'Extracted Vector'))}
             </h3>
+            {isInspectorPinned && (
+              <span className="ml-auto text-[8px] text-slate-400 font-bold uppercase tracking-wider">dbl-click to unpin</span>
+            )}
           </div>
 
           {inspectedData.isPlaceholder && (
