@@ -537,6 +537,19 @@ const App = () => {
     if (showSatellitePanel) loadCacheInfo();
   }, [showSatellitePanel]);
 
+  // On mount, probe whether the NASA geojsons already exist on disk and unlock
+  // the analyse button accordingly — otherwise a page refresh (or a mid-stream
+  // SSE failure that nonetheless persisted the files) leaves the UI locked
+  // despite the map happily showing the cached layers.
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`${API_BASE}/api/data-ready`)
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => { if (!cancelled && d?.ready) setDataLoaded(true); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
   // How many days in the selected fetch range are already in rainfall cache
   const cachedDays = useMemo(() => {
     if (!cacheInfo?.rainfall || !fetchDate) return null;
@@ -2215,6 +2228,13 @@ const App = () => {
                     setFetchProgress({ step: reason, percent: 0 });
                     setIsFetching(false);
                     es.close();
+                    // Server may have persisted all 4 geojsons even though the
+                    // stream died before sending `done` — re-probe so the user
+                    // isn't locked out of analysis.
+                    fetch(`${API_BASE}/api/data-ready`)
+                      .then(r => (r.ok ? r.json() : null))
+                      .then(d => { if (d?.ready) setDataLoaded(true); })
+                      .catch(() => {});
                   });
                 }}
                 disabled={isFetching}

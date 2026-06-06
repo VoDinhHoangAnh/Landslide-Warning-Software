@@ -221,7 +221,7 @@ print("Step 4: Delineating catchments...")
 # Pour points = cells where accumulation exceeds threshold
 # Threshold controls the size of slope units
 # Higher threshold = larger units, fewer polygons
-ACC_THRESHOLD = 2000  # higher = larger slope units, fewer polygons
+ACC_THRESHOLD = 500  # higher = larger slope units, fewer polygons. Lowered from 2000 to subdivide plateau mega-polygons.
 
 pour_points = acc >= ACC_THRESHOLD
 

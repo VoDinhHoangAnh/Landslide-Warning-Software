@@ -847,6 +847,22 @@ def get_cache_status():
     return {key: _scan_cache(cache_dir, prefix) for key, (cache_dir, prefix) in CACHE_ROOTS.items()}
 
 
+@app.get("/api/data-ready")
+def data_ready():
+    """Whether the NASA layer geojsons are already on disk — used by the UI to
+    restore `dataLoaded` after a page refresh or a partial SSE failure."""
+    required = [
+        "lao_cai_rainfall.geojson",
+        "lao_cai_smap.geojson",
+        "lao_cai_ndvi.geojson",
+        "lao_cai_et.geojson",
+    ]
+    files = {name: (os.path.exists(os.path.join(PUBLIC, name))
+                    and os.path.getsize(os.path.join(PUBLIC, name)) > 100)
+             for name in required}
+    return {"ready": all(files.values()), "files": files}
+
+
 @app.delete("/api/cache-delete")
 async def delete_cache_files(request: Request):
     """Delete cache files for given dates. Body: {type: str, dates: [str]}"""
