@@ -1,16 +1,106 @@
-# React + Vite
+# Landslide Warning Software
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A geospatial **landslide-analysis prototype** focused on **Lào Cai, Vietnam**, integrating environmental data retrieval with interactive terrain visualization.
 
-Currently, two official plugins are available:
+> **Safety notice:** This software is **not a validated operational early-warning service**. Outputs must not be relied on as the sole basis for emergency or public-safety decisions.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Project scope
 
-## React Compiler
+- Interactive geospatial interface using **React, Vite, Mapbox GL and Turf.js**.
+- Terrain calculations including slope, aspect, ruggedness, curvature and related indices.
+- Experimental slope-stability indicators and rainfall-related alert logic.
+- Python data pipelines for precipitation, soil moisture, vegetation indices and evapotranspiration.
+- **FastAPI** backend with **Server-Sent Events (SSE)** for progress reporting.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Implementation does not, on its own, prove scientific validity or predictive performance.
 
-## Expanding the ESLint configuration
+## Architecture
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```mermaid
+flowchart LR
+  User[Analyst] --> UI[React + Mapbox UI]
+  UI -->|API| API[FastAPI]
+  API --> Pipelines[Python environmental data pipelines]
+  Pipelines -->|GeoJSON and metrics| API
+  API --> UI
+  UI --> Terrain[Terrain / stability calculations]
+```
+
+## Technology
+
+| Component | Technology |
+| --- | --- |
+| Web interface | React 19, Vite 8, JavaScript, Tailwind CSS |
+| Mapping | Mapbox GL JS, Mapbox Draw, Turf.js |
+| API | Python, FastAPI, Uvicorn, SSE |
+| Scientific data | NASA-related datasets, NetCDF/HDF5, GeoJSON |
+
+## Repository map
+
+```text
+src/App.jsx                 Interactive mapping UI
+src/utils/                 Terrain/stability calculations
+api_server.py              API and progress streaming
+fetch_rainfall.py          Rainfall pipeline
+fetch_smap.py              Soil moisture pipeline
+fetch_ndvi.py              Vegetation index pipeline
+fetch_et.py                Evapotranspiration pipeline
+slope_units.py             Slope-unit processing
+lao_cai_slope_units.geojson  Geographic data
+vite.config.js             Local API proxy
+```
+
+## Development setup — known blockers
+
+This is the intended development sequence, **not** a proven clean-machine installation.
+
+1. Install Node.js/npm and Python with the required scientific/geospatial libraries.
+2. Install web dependencies:
+
+   ```bash
+   npm ci
+   ```
+
+3. Configure local mapping in `.env.local`:
+
+   ```dotenv
+   VITE_MAPBOX_TOKEN=YOUR_DEVELOPMENT_MAPBOX_TOKEN
+   ```
+
+4. Configure NASA Earthdata credentials in your local backend environment; do not commit real secrets.
+5. After installing the Python dependencies, run the API:
+
+   ```bash
+   uvicorn api_server:app --port 8000
+   ```
+
+6. In another terminal, start the web UI:
+
+   ```bash
+   npm run dev:fe
+   ```
+
+Vite proxies `/api` to `http://localhost:8000`.
+
+**Portability limitations:**
+
+- Python modules contain Windows-specific absolute paths for environment, cache and output locations. Replace these with configurable, relative paths before reusing the project on another computer.
+- A complete pinned and verified Python dependency manifest is not yet established.
+- External data access and reproducibility depend on upstream services, authentication and dataset availability.
+
+## Source-level quality checks
+
+```bash
+npm run lint
+npm run build
+```
+
+These commands are defined in the repository, but clean-environment success is not asserted.
+
+## Scientific and public-safety boundaries
+
+The repository has not established independently validated predictive accuracy, false-positive/false-negative rates, representative historical event evaluation, fail-safe behavior or readiness for operational early warning.
+
+**Next steps:** Portable filesystem configuration, pinned Python dependencies, reproducible sample data, explicit scientific methodology, automated tests and out-of-sample evaluation.
+
+**Scope:** Research and software-engineering prototype, not a certified public warning system.
